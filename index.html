@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, viewport-fit=cover" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
 <meta http-equiv="Pragma" content="no-cache" />
 <meta http-equiv="Expires" content="0" />
@@ -10,7 +10,7 @@
 <script>
 /* 브라우저 캐시 우회: 열 때마다 캐시를 거치지 않고 서버의 최신 파일을 확인해서, 버전이 다르면 새 주소(?v=)로 다시 연다.
    (파일을 고쳐 올릴 때 BUILD 값을 바꾼다. 내 컴퓨터에서 파일로 직접 열었을 때는 하지 않는다.) */
-const BUILD = '20261117-1545';
+const BUILD = '20261117-1552';
 if (location.protocol.startsWith('http')) {
   fetch(location.pathname, { cache: 'no-store' }).then(r => r.ok ? r.text() : '').then(t => {
     const m = t.match(/const BUILD = '([^']+)'/);
@@ -22,7 +22,7 @@ if (location.protocol.startsWith('http')) {
 <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Nanum+Pen+Script&family=Gowun+Batang:wght@700&family=Black+Han+Sans&family=Noto+Sans+KR:wght@700&display=swap" rel="stylesheet">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  :root { --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, "D2Coding", monospace; --ph: 34vh; }
+  :root { --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, "D2Coding", monospace; --ph: 27.2vh; }
   html, body { width: 100%; height: 100%; overflow: hidden; }
   body {
     background: radial-gradient(ellipse at 50% 38%, #0b1436 0%, #050818 55%, #02030a 100%);
@@ -49,7 +49,7 @@ if (location.protocol.startsWith('http')) {
   #prog { top: 12px; left: 0; right: 0; text-align: center; color: #8fa3d8; transition: opacity .6s; }
   #hud { left: 14px; bottom: calc(var(--ph) + 10px); color: #6f86c4; }
   #hud b { color: #7dffb0; font-weight: 400; }
-  #btns { position: fixed; right: 12px; bottom: calc(var(--ph) + 10px); z-index: 8; display: flex; gap: 8px; }
+  #btns { position: fixed; right: 12px; bottom: calc(var(--ph) + 10px); z-index: 8; display: flex; flex-direction: column; align-items: center; gap: 8px; }
   #bg { position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: 0; transition: opacity 1.2s; background: center / cover no-repeat; }
   #menuBtn { position: fixed; left: 12px; top: 12px; z-index: 10; }
   #menu { position: fixed; left: 12px; top: 62px; z-index: 10; width: min(280px, calc(100vw - 24px)); padding: 8px; border-radius: 18px; font-size: 13px; }
@@ -79,7 +79,8 @@ if (location.protocol.startsWith('http')) {
   #menu input:not([type=range]), #menu textarea, #menu select { flex: 1; min-width: 0; font: inherit; color: #fff; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.24);
     border-radius: 10px; padding: 8px 10px; outline: none; user-select: text; -webkit-user-select: text; }
   /* 휴대폰은 글자 크기가 16px보다 작은 입력란을 누르면 화면을 확대하므로 16px로 맞춘다 */
-  #menu input:not([type=range]), #menu textarea, #menu select { font-size: 16px; }
+  #menu input:not([type=range]), #menu textarea, #menu select { font-size: 16px !important; }
+  html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
   #menu textarea { resize: none; line-height: 1.45; }
   #menu select { flex: 1.3; color-scheme: dark; cursor: pointer; }
   #menu select option { background: #1c2030; color: #fff; }
@@ -158,13 +159,14 @@ if (location.protocol.startsWith('http')) {
     <div><input id="chars" maxlength="60" placeholder="예: LOVE♥" autocomplete="off" spellcheck="false"><button class="x" data-del="C" title="기본으로" aria-label="기본 글자로" hidden><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12"/><path d="M18 6L6 18"/></svg></button></div>
     <small>트리·얼굴·불꽃을 이 글자들로만 그립니다. 비우면 기본 글자로 돌아갑니다.</small>
   </div>
+  <small id="ver" style="display:block;text-align:right;padding:6px 11px 2px;opacity:.6"></small>
 </div>
 <input id="faceFile" type="file" accept="image/*" hidden>
 <div id="btns">
-  <button id="speedBtn" class="glass" title="읽는 속도 (키보드 1~4, +/-)">▶ 1x</button>
-  <button id="musicBtn" class="ic glass" title="캐롤 켜기" aria-label="캐롤 켜기" aria-pressed="false"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg></button>
   <button id="replayBtn" class="ic glass" title="처음부터 다시 실행" aria-label="처음부터 다시 실행"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg></button>
+  <button id="musicBtn" class="ic glass" title="캐롤 켜기" aria-label="캐롤 켜기" aria-pressed="false"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg></button>
   <button id="shareBtn" class="ic glass" title="사진·배경·글자 설정이 포함된 HTML 사본 공유" aria-label="공유"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3"/><path d="M7 8l5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg></button>
+  <button id="speedBtn" class="ic glass" title="읽는 속도 (키보드 1~4, +/-)">1x</button>
 </div>
 <div id="panel">
   <div id="bar"><span class="dots"><i></i><i></i><i></i></span><b>christmas_tree.js</b><span id="pos"></span><span id="status">● running</span></div>
@@ -607,6 +609,7 @@ stage('finale', 4, () => {
     $('menu').querySelector('[data-del="C"]').hidden = !CHARSET;
     $('menu').querySelector('[data-del="T"]').hidden = !TITLE;
   }
+  $('ver').textContent = 'v ' + BUILD;                 // 지금 보고 있는 파일이 최신인지 확인용
   const openMenu = on => { $('menu').hidden = !on; $('menuBtn').setAttribute('aria-expanded', on); $('menuBtn').innerHTML = on ? '<svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12"/><path d="M18 6L6 18"/></svg>' : '<svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h16"/></svg>'; };
   $('menuBtn').addEventListener('click', () => openMenu($('menu').hidden));
   addEventListener('pointerdown', e => { if (!$('menu').hidden && !e.target.closest('#menu, #menuBtn')) openMenu(false); }, true);
@@ -798,7 +801,7 @@ stage('finale', 4, () => {
   /* ── 배속: 버튼을 누를 때마다 0.5x → 1x → 2x → 4x → 8x, 키보드 1~5 또는 +/- ── */
   function setSpeed(v) {
     speed = v;
-    $('speedBtn').textContent = `▶ ${v}x`;
+    $('speedBtn').textContent = `${v}x`;
     $('speedBtn').classList.toggle('on', v !== 1);
   }
   $('speedBtn').addEventListener('click', () => setSpeed(SPEEDS[(SPEEDS.indexOf(speed) + 1) % SPEEDS.length]));
