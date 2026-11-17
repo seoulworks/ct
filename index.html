@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 <title>christmas_tree.js 🎄</title>
-<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Nanum+Pen+Script&family=Gowun+Batang:wght@700&family=Black+Han+Sans&family=Noto+Sans+KR:wght@700&display=swap" rel="stylesheet">
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   :root { --mono: ui-monospace, "SF Mono", "JetBrains Mono", Menlo, Consolas, "D2Coding", monospace; --ph: 34vh; }
@@ -18,8 +18,8 @@
   /* ── 제목 ── */
   #title {
     position: fixed; top: 2.2vh; left: 0; right: 0; text-align: center; z-index: 6; pointer-events: none;
-    font-family: 'Great Vibes', 'Snell Roundhand', 'Apple Chancery', cursive;
-    font-size: clamp(34px, 6.2vw, 78px); line-height: 1.15;
+    font-family: var(--tf, 'Great Vibes', 'Snell Roundhand', 'Apple Chancery', cursive);
+    font-size: calc(clamp(34px, 6.2vw, 78px) * var(--ts, 1)); line-height: 1.18; white-space: pre-line; padding: 0 12px;
     background: linear-gradient(110deg, #fff6d5, #ffd36b 20%, #ff9ec7 40%, #fff 50%, #9fe8ff 60%, #ffd36b 80%, #fff6d5);
     background-size: 250% 100%; -webkit-background-clip: text; background-clip: text; color: transparent;
     filter: drop-shadow(0 0 16px rgba(255, 211, 107, .6)) drop-shadow(0 0 36px rgba(255, 120, 180, .3));
@@ -35,18 +35,53 @@
   #hud { left: 14px; bottom: calc(var(--ph) + 10px); color: #6f86c4; }
   #hud b { color: #7dffb0; font-weight: 400; }
   #btns { position: fixed; right: 12px; bottom: calc(var(--ph) + 10px); z-index: 8; display: flex; gap: 8px; }
-  .faceBtn { position: fixed; top: 12px; z-index: 8; }
-  #faceBtnL { left: 12px; } #faceBtnR { right: 12px; }
-  .faceBtn.has { opacity: .55; font-size: 10px; padding: 5px 9px; }
-  body.drop::after { content: '왼쪽 / 오른쪽 원하는 쪽에 사진을 놓으세요'; position: fixed; inset: 10px; z-index: 20; display: flex; align-items: center;
-    justify-content: center; border: 2px dashed #ffcf5a; border-radius: 16px; background: rgba(5,8,24,.7); color: #ffcf5a; font-size: 18px; }
-  #btns button, .faceBtn {
-    font: inherit; font-size: 12px; color: #dfe6ff; cursor: pointer; padding: 8px 11px; border-radius: 999px;
-    background: rgba(255,255,255,.07); border: 1px solid rgba(255,255,255,.2);
-    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); transition: all .2s;
+  #bg { position: fixed; inset: 0; z-index: 1; pointer-events: none; opacity: 0; transition: opacity 1.2s; background: center / cover no-repeat; }
+  #menuBtn { position: fixed; left: 12px; top: 12px; z-index: 10; }
+  #menu { position: fixed; left: 12px; top: 62px; z-index: 10; width: min(280px, calc(100vw - 24px)); padding: 8px; border-radius: 18px; font-size: 13px; }
+  /* 글래스모피즘: 반투명 + 뒤 배경 흐림 + 위쪽 테두리 하이라이트 */
+  .glass {
+    background: linear-gradient(145deg, rgba(255,255,255,.2), rgba(255,255,255,.07) 45%, rgba(255,255,255,.12));
+    border: 1px solid rgba(255,255,255,.34);
+    backdrop-filter: blur(18px) saturate(140%) brightness(1.12); -webkit-backdrop-filter: blur(18px) saturate(140%) brightness(1.12);
+    box-shadow: inset 0 1px 0 rgba(255,255,255,.45), inset 0 -1px 0 rgba(255,255,255,.08), 0 8px 24px rgba(0,0,0,.22);
   }
-  #btns button:hover, .faceBtn:hover { background: rgba(255, 211, 107, .2); border-color: rgba(255, 211, 107, .7); }
-  #btns button.on { background: rgba(255, 90, 140, .28); border-color: rgba(255, 140, 180, .8); }
+  #menu.glass { backdrop-filter: blur(26px) saturate(140%) brightness(1.1); -webkit-backdrop-filter: blur(26px) saturate(140%) brightness(1.1); text-shadow: 0 1px 3px rgba(0,0,0,.5); }
+  button svg { pointer-events: none; display: block; }
+  #menu[hidden] { display: none; }
+  #menu .mi { display: flex; align-items: center; gap: 6px; }
+  #menu .mi + .mi { margin-top: 2px; }
+  #menu button { font: inherit; color: #eef2ff; background: none; border: 0; border-radius: 11px; padding: 10px 11px; cursor: pointer; text-align: left; display: flex; align-items: center; gap: 10px; transition: background .2s; }
+  #menu button span { pointer-events: none; }
+  #menu button[data-act] { flex: 1; }
+  #menu button:hover { background: rgba(255,255,255,.12); }
+  #menu button.x { color: rgba(255,255,255,.65); padding: 10px 11px; }
+  #menu button[hidden] { display: none; }
+  #menu .chars { flex-direction: column; align-items: stretch; gap: 7px; padding: 11px 11px 8px; margin-top: 6px; border-top: 1px solid rgba(255,255,255,.14); }
+  #menu label { display: flex; align-items: center; gap: 10px; }
+  #menu .chars > div { display: flex; gap: 6px; }
+  #menu label { color: #eef2ff; }
+  #menu small { color: rgba(255,255,255,.7); font-size: 10.5px; line-height: 1.4; }
+  #menu input:not([type=range]), #menu textarea, #menu select { flex: 1; min-width: 0; font: inherit; color: #fff; background: rgba(255,255,255,.12); border: 1px solid rgba(255,255,255,.24);
+    border-radius: 10px; padding: 8px 10px; outline: none; user-select: text; -webkit-user-select: text; }
+  #menu textarea { resize: none; line-height: 1.45; }
+  #menu select { flex: 1.3; color-scheme: dark; cursor: pointer; }
+  #menu select option { background: #1c2030; color: #fff; }
+  #menu input[type=range] { flex: 1; min-width: 0; accent-color: #fff; cursor: pointer; }
+  #menu .row { align-items: center; }
+  #menu .row output { width: 3.2em; text-align: right; color: rgba(255,255,255,.8); font-size: 11.5px; }
+  #menu input:focus, #menu textarea:focus, #menu select:focus { border-color: rgba(255,255,255,.75); background: rgba(255,255,255,.18); }
+  #menu input::placeholder, #menu textarea::placeholder { color: rgba(255,255,255,.45); }
+  body.drop::after { content: '왼쪽 / 오른쪽 원하는 쪽에 얼굴 사진을 놓으세요'; position: fixed; inset: 10px; z-index: 20; display: flex; align-items: center;
+    justify-content: center; border: 2px dashed #ffcf5a; border-radius: 16px; background: rgba(5,8,24,.7); color: #ffcf5a; font-size: 18px; }
+  #btns button, #menuBtn {
+    font: inherit; font-size: 12.5px; color: #eef2ff; cursor: pointer; height: 42px; padding: 0 15px; border-radius: 999px;
+    display: grid; place-items: center; transition: background .2s, border-color .2s, transform .15s, color .2s;
+  }
+  #btns button:hover, #menuBtn:hover { background: rgba(255,255,255,.26); border-color: rgba(255,255,255,.55); }
+  #btns button:active, #menuBtn:active { transform: scale(.94); }
+  #btns button.ic, #menuBtn { width: 42px; padding: 0; }
+  #btns button.ok { background: rgba(255,255,255,.4); border-color: rgba(255,255,255,.8); }
+  #btns button.on, #menuBtn[aria-expanded="true"] { background: rgba(255,255,255,.38); border-color: rgba(255,255,255,.8); color: #fff; }   /* 켜짐: 색 없이 더 밝은 유리 */
 
   /* ── 코드 패널 ── */
   #panel {
@@ -80,18 +115,39 @@
 </head>
 <body>
 
+<div id="bg"></div>
 <canvas id="fx"></canvas>
 <div id="title"></div>
 <div id="prog"></div>
 <div id="hud"></div>
-<button id="faceBtnL" class="faceBtn">＋ 얼굴 사진 넣기</button>
-<button id="faceBtnR" class="faceBtn">＋ 얼굴 사진 넣기</button>
+<button id="menuBtn" class="glass" title="메뉴" aria-label="메뉴" aria-expanded="false"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h16"/></svg></button>
+<div id="menu" class="glass" hidden>
+  <div class="mi"><button data-act="L"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>좌측 사진 추가</span></button><button class="x" data-del="L" title="지우기" aria-label="좌측 사진 지우기" hidden><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12"/><path d="M18 6L6 18"/></svg></button></div>
+  <div class="mi"><button data-act="R"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg><span>우측 사진 추가</span></button><button class="x" data-del="R" title="지우기" aria-label="우측 사진 지우기" hidden><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12"/><path d="M18 6L6 18"/></svg></button></div>
+  <div class="mi"><button data-act="B"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="1.6"/><path d="M21 16l-5-5-8 9"/></svg><span>배경 사진 추가</span></button><button class="x" data-del="B" title="지우기" aria-label="배경 사진 지우기" hidden><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12"/><path d="M18 6L6 18"/></svg></button></div>
+  <div class="mi chars">
+    <label for="titleText"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M13.5 6.5l4 4"/></svg>상단 문구</label>
+    <div><textarea id="titleText" rows="2" maxlength="80" placeholder="Merry Christmas&#10;(Enter로 줄바꿈)" autocomplete="off" spellcheck="false"></textarea><button class="x" data-del="T" title="기본으로" aria-label="기본 문구로" hidden><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12"/><path d="M18 6L6 18"/></svg></button></div>
+    <div class="row">
+      <select id="titleFont" aria-label="문구 글꼴">
+        <option value="script">필기체</option><option value="pen">손글씨</option><option value="serif">명조</option>
+        <option value="sans">고딕</option><option value="bold">굵은 제목</option><option value="mono">코드</option>
+      </select>
+      <input id="titleSize" type="range" min="50" max="200" step="5" value="100" aria-label="문구 크기"><output id="titleSizeOut">100%</output>
+    </div>
+  </div>
+  <div class="mi chars">
+    <label for="chars"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 6V4h14v2"/><path d="M12 4v16"/><path d="M9 20h6"/></svg>구성 문자열 제한</label>
+    <div><input id="chars" maxlength="60" placeholder="예: LOVE♥" autocomplete="off" spellcheck="false"><button class="x" data-del="C" title="기본으로" aria-label="기본 글자로" hidden><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12"/><path d="M18 6L6 18"/></svg></button></div>
+    <small>트리·얼굴·불꽃을 이 글자들로만 그립니다. 비우면 기본 글자로 돌아갑니다.</small>
+  </div>
+</div>
 <input id="faceFile" type="file" accept="image/*" hidden>
 <div id="btns">
-  <button id="speedBtn" title="읽는 속도 (키보드 1~4, +/-)">▶ 1x</button>
-  <button id="musicBtn">♪ 캐롤</button>
-  <button id="replayBtn">↻ 다시</button>
-  <button id="shareBtn" title="사진이 포함된 HTML 사본 만들기">⇪ 공유</button>
+  <button id="speedBtn" class="glass" title="읽는 속도 (키보드 1~4, +/-)">▶ 1x</button>
+  <button id="musicBtn" class="ic glass" title="캐롤 켜기" aria-label="캐롤 켜기" aria-pressed="false"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg></button>
+  <button id="replayBtn" class="ic glass" title="처음부터 다시 실행" aria-label="처음부터 다시 실행"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg></button>
+  <button id="shareBtn" class="ic glass" title="사진·배경·글자 설정이 포함된 HTML 사본 공유" aria-label="공유"><svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V3"/><path d="M7 8l5-5 5 5"/><path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg></button>
 </div>
 <div id="panel">
   <div id="bar"><span class="dots"><i></i><i></i><i></i></span><b>christmas_tree.js</b><span id="pos"></span><span id="status">● running</span></div>
@@ -364,6 +420,7 @@ stage('finale', 4, () => {
   }
 
   /* ── 불꽃: 글자가 터진다 ── */
+  const sparkCh = () => { const g = typeof glyphs === 'function' ? glyphs() : []; return g.length ? pick(g) : pick('*+·•01{}<>#;=/'); };
   firework = (x, y, z = 0) => {
     const cols = [pick(['GOLD', 'RED', 'BLUE', 'PINK', 'VIOLET', 'G4']), pick(['WHITE', 'GOLD', 'ICE', 'PINK'])];
     const ring = Math.random() < .3, n = 110, sp = rand(3.2, 5);
@@ -371,11 +428,12 @@ stage('finale', 4, () => {
       const a = rand(TAU), e = ring ? 0 : Math.acos(rand(-1, 1)) - Math.PI / 2, v = sp * (ring ? 1 : rand(.45, 1));
       const life = rand(1.2, 2.2);
       sparks.push({ x, y, z, vx: Math.cos(a) * Math.cos(e) * v, vy: Math.sin(a) * Math.cos(e) * v, vz: Math.sin(e) * v,
-        life, max: life, ch: pick('*+·•01{}<>#;=/'), color: cols[i & 1] });
+        life, max: life, ch: sparkCh(), color: cols[i & 1] });
     }
     flashes.push({ x, y, life: .45, color: cols[0] });
   };
-  say = text => { $('title').textContent = text; $('title').classList.add('show'); };
+  let TITLE = '';                                   // 메뉴에서 적은 상단 문구 (비어 있으면 코드에 적힌 기본 문구)
+  say = text => { $('title').textContent = TITLE || text; $('title').classList.add('show'); };
 
   /* ── 매 프레임: 회전 → 투영 → 깊이에 따라 밝기 → 글자 찍기 ── */
   function draw(dt) {
@@ -463,10 +521,126 @@ stage('finale', 4, () => {
   /* ── 얼굴: 사진을 칸마다 밝기로 재서 글자로 바꾸고, 밝은 곳일수록 앞으로 튀어나오게 3D로 놓는다 ── */
   const RAMP = " .,:;-~=+*xo%#&@";
   let faceR = 0, faceCols = 0;
+
+  /* ── 구성 문자열 제한: 지정한 글자들만으로 트리·얼굴·불꽃을 그린다 ── */
+  let CHARSET = '';
+  const store = { get: k => { try { return localStorage.getItem(k + COPY); } catch (e) { return null; } },
+                  set: (k, v) => { try { localStorage.setItem(k + COPY, v); } catch (e) {} } };
+  const glyphs = () => [...CHARSET.replace(/\s/g, '')];
+  const density = (() => {                                   // 글자의 '획이 많은 정도'를 실제로 그려서 잰다
+    const c = document.createElement('canvas'); c.width = c.height = 28;
+    const x = c.getContext('2d', { willReadFrequently: true }), memo = {};
+    return ch => {
+      if (ch in memo) return memo[ch];
+      x.clearRect(0, 0, 28, 28); x.font = '700 20px ' + getComputedStyle(document.body).fontFamily;
+      x.textAlign = 'center'; x.textBaseline = 'middle'; x.fillStyle = '#fff'; x.fillText(ch, 14, 14);
+      const d = x.getImageData(0, 0, 28, 28).data; let n = 0;
+      for (let i = 3; i < d.length; i += 4) n += d[i];
+      return memo[ch] = n;
+    };
+  })();
+  function ramp() {                                          // 어두움 → 밝음 순서의 글자 사다리
+    const g = [...new Set(glyphs())];
+    if (!g.length) return RAMP;
+    g.sort((a, b) => density(a) - density(b));
+    return [' ', ...(g.length === 1 ? [g[0], g[0]] : g)];
+  }
+  const BODY = { leaf: 1, trunk: 1, frost: 1, gift: 1 };
+  function applyCharset(text) {
+    CHARSET = text;
+    const g = glyphs(); let i = 0;
+    for (const st of stages) for (const p of st.items) {
+      if (typeof p === 'function' || !BODY[p.kind]) continue;
+      if (p.ch0 === undefined) p.ch0 = p.ch;
+      p.ch = g.length ? g[i++ % g.length] : p.ch0;           // 적은 순서대로 반복해서 채운다
+    }
+    reloadFaces(); syncMenu();
+  }
+
+  /* ── 배경 사진: 진짜 이미지를 화면 가득 깔고, 글자 트리가 묻히지 않게 어둡게 덮는다 ── */
+  let bgImg = null, bgSmall = null;
+  function loadBg(src, save) {
+    const img = new Image();
+    img.onload = () => {
+      bgImg = img;
+      const k = Math.min(1, 1600 / Math.max(img.width, img.height));    // 저장·공유용으로 긴 변 1600px까지 줄인다
+      const t = document.createElement('canvas'); t.width = img.width * k; t.height = img.height * k;
+      t.getContext('2d').drawImage(img, 0, 0, t.width, t.height);
+      bgSmall = t.toDataURL('image/jpeg', .82);
+      if (save) store.set('xmasBg', bgSmall);
+      renderBg(); syncMenu();
+    };
+    img.src = src;
+  }
+  function renderBg() {
+    const el = $('bg');
+    if (!bgImg) { el.style.opacity = 0; return; }
+    el.style.backgroundImage = `radial-gradient(ellipse at 50% 40%, rgba(2,3,10,.42), rgba(2,3,10,.72)), url(${bgSmall})`;
+    el.style.opacity = 1;
+  }
+
+  /* ── 햄버거 메뉴 ── */
+  function syncMenu() {
+    for (const s of slots) {
+      $('menu').querySelector(`[data-act="${s.id}"] span`).textContent = `${s.name} 사진 ${s.src ? '변경' : '추가'}`;
+      $('menu').querySelector(`[data-del="${s.id}"]`).hidden = !s.src;
+    }
+    $('menu').querySelector('[data-act="B"] span').textContent = `배경 사진 ${bgImg ? '변경' : '추가'}`;
+    $('menu').querySelector('[data-del="B"]').hidden = !bgImg;
+    $('menu').querySelector('[data-del="C"]').hidden = !CHARSET;
+    $('menu').querySelector('[data-del="T"]').hidden = !TITLE;
+  }
+  const openMenu = on => { $('menu').hidden = !on; $('menuBtn').setAttribute('aria-expanded', on); $('menuBtn').innerHTML = on ? '<svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 6l12 12"/><path d="M18 6L6 18"/></svg>' : '<svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h16"/></svg>'; };
+  $('menuBtn').addEventListener('click', () => openMenu($('menu').hidden));
+  addEventListener('pointerdown', e => { if (!$('menu').hidden && !e.target.closest('#menu, #menuBtn')) openMenu(false); }, true);
+  $('menu').addEventListener('click', e => {
+    const act = e.target.dataset.act, del = e.target.dataset.del;
+    if (act) {                                               // 사진 고르기
+      target = act === 'B' ? 'bg' : slots.find(s => s.id === act);
+      $('faceFile').value = ''; $('faceFile').click(); openMenu(false);
+    } else if (del === 'B') { bgImg = bgSmall = null; store.set('xmasBg', 'none'); renderBg(); syncMenu(); }
+    else if (del === 'T') { $('titleText').value = ''; setTitle(''); }
+    else if (del === 'C') { $('chars').value = ''; store.set('xmasChars', ''); applyCharset(''); }
+    else if (del) {
+      const s = slots.find(s => s.id === del);
+      s.parts = []; s.src = s.small = null; store.set(s.key, 'none'); syncMenu();
+    }
+  });
+  function setTitle(text, save = true) {               // 적는 즉시 화면에 보여준다
+    TITLE = text.trim();
+    if (save) store.set('xmasTitle', text);
+    say('Merry Christmas'); syncMenu();
+  }
+  $('titleText').addEventListener('input', e => setTitle(e.target.value));
+
+  /* 문구 글꼴·크기: CSS 변수만 바꾼다 (웹폰트를 못 불러오면 비슷한 기본 글꼴로 대체) */
+  const FONTS = {
+    script: "'Great Vibes', 'Snell Roundhand', 'Apple Chancery', cursive",
+    pen:    "'Nanum Pen Script', 'Great Vibes', cursive",
+    serif:  "'Gowun Batang', 'Noto Serif KR', 'Apple Myungjo', Batang, serif",
+    sans:   "'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif",
+    bold:   "'Black Han Sans', 'Noto Sans KR', 'Apple SD Gothic Neo', sans-serif",
+    mono:   getComputedStyle(document.body).fontFamily,
+  };
+  let TFONT = 'script', TSIZE = 100;
+  function setFont(v, save = true) {
+    TFONT = FONTS[v] ? v : 'script'; $('titleFont').value = TFONT;
+    $('title').style.setProperty('--tf', FONTS[TFONT]);
+    $('title').style.fontWeight = TFONT === 'sans' || TFONT === 'serif' || TFONT === 'mono' ? 700 : 400;
+    if (save) { store.set('xmasFont', TFONT); say('Merry Christmas'); }
+  }
+  function setSize(v, save = true) {
+    TSIZE = Math.max(50, Math.min(200, +v || 100)); $('titleSize').value = TSIZE; $('titleSizeOut').textContent = TSIZE + '%';
+    $('title').style.setProperty('--ts', TSIZE / 100);
+    if (save) { store.set('xmasSize', TSIZE); say('Merry Christmas'); }
+  }
+  $('titleFont').addEventListener('change', e => setFont(e.target.value));
+  $('titleSize').addEventListener('input', e => setSize(e.target.value));
+  $('chars').addEventListener('input', e => { store.set('xmasChars', e.target.value); applyCharset(e.target.value); });
   const BAKED = window.BAKED || {}, COPY = BAKED.id || '';
   const slots = [                                   // 좌우 대칭으로 두 자리
-    { side: -1, key: 'xmasFace',  btn: $('faceBtnL'), parts: [], src: null },
-    { side:  1, key: 'xmasFaceR', btn: $('faceBtnR'), parts: [], src: null },
+    { side: -1, key: 'xmasFace',  id: 'L', name: '좌측', parts: [], src: null },
+    { side:  1, key: 'xmasFaceR', id: 'R', name: '우측', parts: [], src: null },
   ];
   function faceLayout() {
     faceR = Math.max(62, Math.min(W * .15, areaH * .2, 125));
@@ -486,13 +660,13 @@ stage('finale', 4, () => {
         const l = (d[i * 4] * .299 + d[i * 4 + 1] * .587 + d[i * 4 + 2] * .114) / 255;
         lum.push(l); if (l < lo) lo = l; if (l > hi) hi = l;
       }
-      const parts = [];
+      const parts = [], RP = ramp();
       const born = () => ({ born: now, fly: rand(.8, 1.7), arc: rand(10, 80), fx: rand(W), fy: areaH + rand($('panel').offsetHeight * .6), ph: rand(TAU) });
       for (let r = 0; r < rows; r++) for (let q = 0; q < cols; q++) {
         const u = (q + .5) / cols * 2 - 1, v = (r + .5) / rows * 2 - 1;
         if (u * u + v * v > 1) continue;                                 // 프로필 사진처럼 동그랗게
         const l = (lum[r * cols + q] - lo) / Math.max(.05, hi - lo);
-        const ch = RAMP[Math.min(RAMP.length - 1, l * RAMP.length | 0)];
+        const ch = RP[Math.min(RP.length - 1, l * RP.length | 0)];
         if (ch !== ' ') parts.push(Object.assign({ u, v, l, ch, color: 'FACE' }, born()));
       }
       for (let i = 0; i < 64; i++) {                                     // 금빛 테두리
@@ -500,11 +674,11 @@ stage('finale', 4, () => {
         parts.push(Object.assign({ u: Math.cos(a) * 1.1, v: Math.sin(a) * 1.1, l: .5, ch: '*+'[i & 1], color: 'GOLD', rim: 1 }, born()));
       }
       slot.parts = parts; slot.src = src;
-      slot.btn.classList.add('has'); slot.btn.textContent = '사진 변경';
+      syncMenu();
       const t = document.createElement('canvas'); t.width = t.height = 240;   // 작은 사본: 저장·공유용
       t.getContext('2d').drawImage(img, (img.width - m) / 2, (img.height - m) / 2, m, m, 0, 0, 240, 240);
       slot.small = t.toDataURL('image/jpeg', .85);
-      if (save) try { localStorage.setItem(slot.key + COPY, slot.small); } catch (e) {}   // 다음에 열어도 남도록
+      if (save) store.set(slot.key, slot.small);   // 다음에 열어도 남도록
     };
     img.src = src;
   }
@@ -513,10 +687,9 @@ stage('finale', 4, () => {
     let last = '', fontSet = false;
     for (const slot of slots) {
       const x0 = slot.side < 0 ? 14 + R * 1.25 : W - 14 - R * 1.25;      // 화면 중심선 기준 좌우 대칭
-      slot.btn.style.top = (slot.parts.length ? y0 + R * 1.3 : y0 - 14) + 'px';
       if (!slot.parts.length) continue;
       if (!fontSet) { ctx.font = `700 ${(R * 2 / faceCols / .6).toFixed(1)}px ${getComputedStyle(document.body).fontFamily}`; fontSet = true; }
-      const yaw = -slot.side * Math.sin(now * .7) * .5, pit = Math.sin(now * .45) * .22;   // 회전도 거울처럼 반대로
+      const yaw = -slot.side * .22, pit = 0;                    // 움직이지 않고, 트리 쪽으로 살짝만 돌린 채 고정 (좌우 거울 대칭)
       const c = Math.cos(yaw), s = Math.sin(yaw), cp = Math.cos(pit), sp = Math.sin(pit);
       for (const p of slot.parts) {
         const dz = p.rim ? 0 : (p.l - .45) * .55;                        // 밝기 → 깊이 (부조)
@@ -536,8 +709,7 @@ stage('finale', 4, () => {
     }
   }
   let target = slots[0];
-  const pickFile = (f, slot) => { if (!f || !f.type.startsWith('image/')) return; const r = new FileReader(); r.onload = () => loadFace(slot, r.result, true); r.readAsDataURL(f); };
-  for (const slot of slots) slot.btn.addEventListener('click', () => { target = slot; $('faceFile').value = ''; $('faceFile').click(); });
+  const pickFile = (f, slot) => { if (!f || !f.type.startsWith('image/')) return; const r = new FileReader(); r.onload = () => slot === 'bg' ? loadBg(r.result, true) : loadFace(slot, r.result, true); r.readAsDataURL(f); };
   $('faceFile').addEventListener('change', e => pickFile(e.target.files[0], target));
   addEventListener('dragover', e => { e.preventDefault(); document.body.classList.add('drop'); });
   addEventListener('dragleave', e => { if (!e.relatedTarget) document.body.classList.remove('drop'); });
@@ -550,21 +722,22 @@ stage('finale', 4, () => {
   $('shareBtn').addEventListener('click', async () => {
     const faces = {};
     for (const s of slots) if (s.small) faces[s.key] = s.small;
-    const baked = { id: '-' + Date.now().toString(36), faces };
+    const baked = { id: '-' + Date.now().toString(36), faces, bg: bgSmall, chars: CHARSET, title: TITLE, font: TFONT, size: TSIZE };
     const html = PRISTINE.replace(/<script id="baked">[\s\S]*?<\/script>/, () => `<script id="baked">window.BAKED = ${JSON.stringify(baked)};<\/script>`);
     const file = new File([html], 'merry-christmas.html', { type: 'text/html' });
-    const btn = $('shareBtn'), flash = t => { btn.textContent = t; setTimeout(() => btn.textContent = '⇪ 공유', 2200); };
+    const btn = $('shareBtn'), icon = btn.innerHTML;
+    const flash = () => { btn.innerHTML = '<svg viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12.5l5.5 5.5L20 6.5"/></svg>'; btn.classList.add('ok'); setTimeout(() => { btn.innerHTML = icon; btn.classList.remove('ok'); }, 2200); };   // 완료되면 잠깐 체크 표시
     try {
       if (navigator.canShare && navigator.canShare({ files: [file] })) {   // 휴대폰: 공유 시트로 바로 보내기
         await navigator.share({ files: [file], title: 'Merry Christmas 🎄' });
-        return flash('✔ 공유됨');
+        return flash();
       }
     } catch (e) { if (e.name === 'AbortError') return; }
     const a = document.createElement('a');                                 // 그 외: 파일로 저장
     a.href = URL.createObjectURL(file); a.download = file.name;
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(() => URL.revokeObjectURL(a.href), 5000);
-    flash('✔ 파일 저장됨');
+    flash();
   });
   const reloadFaces = () => slots.forEach(s => s.src && loadFace(s, s.src));
 
@@ -588,7 +761,7 @@ stage('finale', 4, () => {
   /* ── 입력: 드래그 회전, 클릭 불꽃 ── */
   let down = null;
   addEventListener('pointerdown', e => {
-    if (e.target.closest('button')) return;
+    if (e.target.closest('button, #menu')) return;
     down = { x: e.clientX, y: e.clientY, lx: e.clientX, moved: 0 }; dragging = true;
   });
   addEventListener('pointermove', e => {
@@ -613,6 +786,7 @@ stage('finale', 4, () => {
   }
   $('speedBtn').addEventListener('click', () => setSpeed(SPEEDS[(SPEEDS.indexOf(speed) + 1) % SPEEDS.length]));
   addEventListener('keydown', e => {
+    if (/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
     const i = SPEEDS.indexOf(speed);
     if (e.key >= '1' && e.key <= '5') setSpeed(SPEEDS[+e.key - 1]);
     else if (e.key === '+' || e.key === '=') setSpeed(SPEEDS[Math.min(SPEEDS.length - 1, i + 1)]);
@@ -652,16 +826,21 @@ stage('finale', 4, () => {
       const old = master; setTimeout(() => old.disconnect(), 400);
     }
     playing = !playing; e.currentTarget.classList.toggle('on', playing);
-    e.currentTarget.textContent = playing ? '♪ 끄기' : '♪ 캐롤';
+    const label = playing ? '캐롤 끄기' : '캐롤 켜기';
+    e.currentTarget.title = label; e.currentTarget.setAttribute('aria-label', label); e.currentTarget.setAttribute('aria-pressed', playing);
   });
 
   resize(); reset(); requestAnimationFrame(loop);
-  for (const slot of slots) {                      // 이 사본에서 바꾼 사진 → 없으면 파일에 심어진 사진
-    let saved = null;
-    try { saved = localStorage.getItem(slot.key + COPY); } catch (e) {}
-    saved = saved || (BAKED.faces || {})[slot.key];
-    if (saved) loadFace(slot, saved);
-  }
+  const saved = (k, baked) => { const v = store.get(k); return v === 'none' ? null : v || baked || null; };   // 이 사본에서 바꾼 것 → 없으면 파일에 심어진 것
+  setFont(store.get('xmasFont') || BAKED.font || 'script', false);
+  setSize(store.get('xmasSize') || BAKED.size || 100, false);
+  const title0 = store.get('xmasTitle') ?? BAKED.title ?? '';
+  if (title0.trim()) { $('titleText').value = title0; TITLE = title0.trim(); }
+  const chars0 = store.get('xmasChars') ?? BAKED.chars ?? '';
+  if (chars0) { $('chars').value = chars0; applyCharset(chars0); }
+  for (const slot of slots) { const v = saved(slot.key, (BAKED.faces || {})[slot.key]); if (v) loadFace(slot, v); }
+  const bg0 = saved('xmasBg', BAKED.bg); if (bg0) loadBg(bg0);
+  syncMenu();
 })();
 </script>
 </body>
